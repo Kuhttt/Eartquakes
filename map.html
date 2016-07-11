@@ -41,32 +41,40 @@
 $.ajax({
   dataType: 'json',
   url: '/earthquake',
-  success: function(jsondata){
-   earthqkLayer=L.geoJson(jsondata).addTo(map);
-  }
+ success: function (jsondata) {
+ 	earthqkLayer=L.geoJson(jsondata, {pointToLayer: function(feature, latlng){
+ 		return L.circleMarker(latlng, {
+ 			radius: feature.properties.mag*5,
+ 			fillColor: "red"
+ 		}
+ 			);
+ 	}
+ 		}
+ 		).addTo(map);
+ 	}
+ 	}
+);
 
+var MyControl = L.Control.extend({
+    options: {
+        position: 'topright'
+    },
+
+    onAdd: function (map) {
+        
+        var container = L.DomUtil.create('div', 'my-custom-control');
+       container.style.backgroundColor = 'blue';
+       container.style.width = '60px';
+       container.style.height = '60px';
+ 
+    container.onclick = function(){
+      earthqkLayer.refresh('/earthquake');
+    }
+    return container;
+    }
 });
 
-// var MyControl = L.Control.extend({
-//     options: {
-//         position: 'topright'
-//     },
-
-//     onAdd: function (map) {
-//         // create the control container with a particular class name
-//         var container = L.DomUtil.create('div', 'my-custom-control');
-//         earthqkLayer.refresh('/earthquake');
-
-//         // ... initialize other DOM elements, add listeners, etc.
-
-//         return container;
-//     }
-// });
-
-// map.addControl(new MyControl());
-//};
-
-
+map.addControl(new MyControl());
     </script>
 </body>
 </html>
