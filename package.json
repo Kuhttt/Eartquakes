@@ -1,0 +1,22 @@
+{
+  "name": "earthquake",
+  "version": "1.0.0",
+  "description": "Shows eathquakes on map",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"test\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kuhttt/Eartquakes.git"
+  },
+  "keywords": [
+    "earthquake"
+  ],
+  "author": "Kuhttt",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Kuhttt/Eartquakes/issues"
+  },
+  "homepage": "https://github.com/Kuhttt/Eartquakes#readme"
+}
