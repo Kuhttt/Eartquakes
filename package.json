@@ -10,6 +10,11 @@
     "type": "git",
     "url": "git+https://github.com/Kuhttt/Eartquakes.git"
   },
+  "dependencies": {
+  {  "csv2geojson": "5.0.0"
+  , "jquery": "3.0.0"
+  }
+  }
   "keywords": [
     "earthquake"
   ],
