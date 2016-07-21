@@ -21,11 +21,11 @@
     <div id="map"></div>
     <script>
 
-        var tileLayer;
-
         var map = new L.Map('map', {
             center: new L.LatLng(50.455002, 30.511284),
-            zoom: 9,
+            zoom: 3,
+            minZoom:2,
+            maxBounds:([[-85,-180],[85,180]]),
             layers : [
             new L.TileLayer('http://tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
                         maxZoom: 19,
@@ -36,24 +36,81 @@
             ]
         });
 
- var earthqkLayer;
+var earthqkLayer;
+var countries=[];
+var points=[];
 
+function geojsonAddData(){
 $.ajax({
   dataType: 'json',
   url: '/earthquake',
  success: function (jsondata) {
- 	earthqkLayer=L.geoJson(jsondata, {pointToLayer: function(feature, latlng){
- 		return L.circleMarker(latlng, {
- 			radius: feature.properties.mag*5,
- 			fillColor: "red"
+ 	console.log(jsondata["features"][0]);
+ 	var arr=jsondata.features[0].properties.place.split(',');
+ 	countries[0]={
+ 		country: arr[1],
+ 		points:[{lat:jsondata.features[0].geometry.coordinates[0],
+ 				 lon:jsondata.features[0].geometry.coordinates[1]
+ 					}]
+ 	};
+ 	var name;
+ 	for(var k=1;k<jsondata["features"].length;k++){
+ 		name=jsondata.features[k].properties.place.split(',');
+ 		for(var i=0;i<countries.length;i++){
+ 			if(countries[i].country===name[1]){countries[i].points.push({
+ 				lat:jsondata.features[k].geometry.coordinates[0],
+ 				lon:jsondata.features[k].geometry.coordinates[1]
+ 			});
+ 			}
+
+ 			else {
+ 				countries[++i]={
+ 					country: name[1],
+ 					points:[{
+ 						lat:jsondata.features[k].geometry.coordinates[0],
+ 						lon:jsondata.features[k].geometry.coordinates[1]
+ 					}]
+ 				};
+ 			}
  		}
- 			);
  	}
- 		}
+ 	earthqkLayer=L.geoJson(jsondata, {
+ 		pointToLayer: function(feature, latlng){
+		function rad(feature){
+	 			if(feature.properties.mag<=3){ 
+	 				return 60000;
+				}
+				else if(feature.properties.mag<=6){ 
+					return 100000;
+				}else if(feature.properties.mag<=9){
+					return 150000;
+				}else 
+				return 180000;
+	 		};
+ 		var radius = rad(feature);
+		var circle = L.circle(latlng, radius , {
+	 			fillColor: "red",
+	 			weight: 0,
+	 			fillOpacity: 0.7
+	 		});
+ 		return circle;
+ 	},
+ 	onEachFeature: function(feature,layer){
+ 		layer.bindPopup('Place: '+feature.properties.place+ "<br>"+ 'Time: '+feature.properties.time+"<br>"+'Mag: '+feature.properties.mag);
+ 	}
+	}
  		).addTo(map);
  	}
  	}
 );
+};
+
+geojsonAddData();
+
+function geojsonRefresh(){
+    map.removeLayer(earthqkLayer);
+	geojsonAddData();
+}
 
 var MyControl = L.Control.extend({
     options: {
@@ -68,13 +125,14 @@ var MyControl = L.Control.extend({
        container.style.height = '60px';
  
     container.onclick = function(){
-      earthqkLayer.refresh('/earthquake');
+      geojsonRefresh();
     }
     return container;
     }
 });
 
 map.addControl(new MyControl());
+
     </script>
 </body>
 </html>
